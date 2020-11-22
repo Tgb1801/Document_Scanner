@@ -42,22 +42,6 @@ Mat Coloured_to_GrayScale(Mat img)		// This function converts coloured image to 
 	return gray_scaled_img;
 }
 
-Mat GrayScale_to_Blur(Mat gray_scale)		// This function converts gray scale image to blurred image.
-{
-	float mat[49];
-
-	for (int i = 0; i < 49; i++)
-		mat[i] = 1.0 / 49.0;
-
-	Mat k(7, 7, CV_32F, mat);
-
-	Mat Blurred_img;
-
-	filter2D(gray_scale, Blurred_img, -1, k);	// Gray Scale image converted to blurred image.
-
-	return Blurred_img;
-}
-
 int main()
 {
 	Mat img = imread("ticket.jpg");		// To get image in the img variable.
@@ -70,11 +54,15 @@ int main()
 
 	Mat gray_scaled_img = Coloured_to_GrayScale( img );		// Gray Scaled image.
 
-	Mat Blurred_img = GrayScale_to_Blur(gray_scaled_img);	// Blurred image.
+	Mat Blurred_img(gray_scaled_img);
+	GaussianBlur(gray_scaled_img,Blurred_img,Size(7,7),0);
 
-	namedWindow("Blurred", WINDOW_NORMAL);
+	Mat edge_detected(Blurred_img);
+	Canny(Blurred_img,edge_detected,75,200);
 
-	imshow("Blurred", Blurred_img);
+	namedWindow("edge detection", WINDOW_NORMAL);
+
+	imshow("edge detection", edge_detected);
 
 	waitKey(0);
 
