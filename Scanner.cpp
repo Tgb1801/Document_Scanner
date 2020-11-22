@@ -42,6 +42,29 @@ Mat Coloured_to_GrayScale(Mat img)		// This function converts coloured image to 
 	return gray_scaled_img;
 }
 
+/*Mat GrayScale_to_Blur(Mat gray_scale)		// This function converts gray scale image to blurred image.
+{
+	float mat[49];
+
+	for (int i = 0; i < 49; i++)
+		mat[i] = 1.0 / 49.0;
+
+	Mat k(7, 7, CV_32F, mat);
+
+	Mat Blurred_img;
+
+	filter2D(gray_scale, Blurred_img, -1, k);	// Gray Scale image converted to blurred image.
+
+	return Blurred_img;
+}*/
+
+bool compareContourAreas(vector<Point> contour1, vector<Point> contour2)
+{
+	double i = fabs(contourArea(Mat(contour1)));
+	double j = fabs(contourArea(Mat(contour2)));
+	return (i < j);
+}
+
 int main()
 {
 	Mat img = imread("ticket.jpg");		// To get image in the img variable.
@@ -52,17 +75,35 @@ int main()
 
 	waitKey(0);
 
-	Mat gray_scaled_img = Coloured_to_GrayScale( img );		// Gray Scaled image.
-
+	Mat gray_scaled_img = Coloured_to_GrayScale(img);
+	
 	Mat Blurred_img(gray_scaled_img);
-	GaussianBlur(gray_scaled_img,Blurred_img,Size(7,7),0);
+
+	GaussianBlur(gray_scaled_img, Blurred_img, Size(7, 7), 0);	// Gives Blurred image. 
 
 	Mat edge_detected(Blurred_img);
-	Canny(Blurred_img,edge_detected,75,200);
+
+	Canny(Blurred_img, edge_detected, 75, 200);	// Gives edge-detected image.
 
 	namedWindow("edge detection", WINDOW_NORMAL);
 
 	imshow("edge detection", edge_detected);
+
+	Mat Copy_Edged = edge_detected;
+
+	vector<vector<Point>> contours;
+
+	vector<Vec4i> hierarchy;
+
+	findContours(Copy_Edged, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);	
+
+	sort(contours.begin(), contours.end(), compareContourAreas);
+
+	drawContours(img, contours, contours.size()-1 , Scalar(0, 255, 0), 2);
+
+	namedWindow("Contours", WINDOW_NORMAL);
+
+	imshow("Contours", img);
 
 	waitKey(0);
 
