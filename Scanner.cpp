@@ -65,6 +65,33 @@ bool compareContourAreas(vector<Point> contour1, vector<Point> contour2)
 	return (i < j);
 }
 
+vector<Point> findBorderPoints(vector<vector<Point>> contours){
+	int i = contours.size()-1;
+	vector<Point> borderpts(4);
+
+	long summax = LONG_MIN, summin = LONG_MAX, diffmax = LONG_MIN, diffmin = LONG_MAX;
+	Point smax, smin, dmax, dmin;
+
+	for(Point j : contours[i]){
+		if(j.x + j.y >summax){
+			summax = j.x + j.y;
+			smax = j;
+		}else if(j.x + j.y < summin){
+			summin = j.x + j.y;
+			smin = j;
+		}
+		if(j.y - j.x > diffmax){
+			diffmax = j.y - j.x;
+			dmax = j;
+		}else if(j.y - j.x < diffmin){
+			diffmin = j.y - j.x;
+			dmin = j;
+		}
+	}
+	borderpts[0] = smin; borderpts[1] = dmin; borderpts[2] = smax; borderpts[3] = dmax;
+	return borderpts;
+}
+
 int main()
 {
 	Mat img = imread("ticket.jpg");		// To get image in the img variable.
@@ -98,6 +125,18 @@ int main()
 	findContours(Copy_Edged, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);	
 
 	sort(contours.begin(), contours.end(), compareContourAreas);
+
+	vector<Point> bpoints = findBorderPoints(contours);
+
+	Mat duplicate_image = img;
+
+	for(Point j : bpoints){
+		circle(duplicate_image, j, 10, Scalar( 0, 255, 0 ), FILLED);
+	}
+
+	namedWindow("Points", WINDOW_NORMAL);
+
+	imshow("Points", duplicate_image);
 
 	drawContours(img, contours, contours.size()-1 , Scalar(0, 255, 0), 2);
 
